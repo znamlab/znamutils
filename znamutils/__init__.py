@@ -1,1 +1,1 @@
-from decorators import slurm_it
+from .decorators import slurm_it

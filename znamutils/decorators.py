@@ -1,5 +1,5 @@
 from decorator import decorator
-from cottage_analysis.utilities import slurm_helper
+from znamutils import slurm_helper
 import inspect
 from inspect import signature, Parameter
 from decopatch import function_decorator, DECORATED
