@@ -48,7 +48,7 @@ def slurm_it(
     # add parameters to the wrapped function signature
     func_sig = signature(func)
     use_slurm = Parameter(
-        "use_slurm", kind=Parameter.POSITIONAL_OR_KEYWORD, default=True
+        "use_slurm", kind=Parameter.POSITIONAL_OR_KEYWORD, default=False
     )
     job_dependency = Parameter(
         "job_dependency", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
