@@ -100,7 +100,7 @@ def python_script_single_func(
             Defaults to None.
         imports (str or list, optional): List of imports to add to the script. Defaults
             to None.
-        fromimport (dict, optional): Dictionary of imports to add to the script. Keys
+        from_imports (dict, optional): Dictionary of imports to add to the script. Keys
             are the module names, values are the functions to import. For instance
             {'numpy': 'mean'} results in `from numpy import mean`. Defaults to None.
     """

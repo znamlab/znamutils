@@ -26,7 +26,7 @@ def test_slurm_my_func():
     out = test_func(1, 2, use_slurm=False)
     assert out == 3
     # using slurm
-    out = test_func(1, 2, slurm_folder=slurm_folder)
+    out = test_func(1, 2, use_slurm=True, slurm_folder=slurm_folder)
     sbatch_file = slurm_folder / "test_func.sh"
     assert sbatch_file.exists()
     python_file = slurm_folder / "test_func.py"
@@ -34,7 +34,13 @@ def test_slurm_my_func():
 
     assert isinstance(out, str)
     # wait for previous job to finish
-    test_func(1, 2, scripts_name="test_func_renamed", slurm_folder=slurm_folder)
+    test_func(
+        1,
+        2,
+        use_slurm=True,
+        scripts_name="test_func_renamed",
+        slurm_folder=slurm_folder,
+    )
     sbatch_file = slurm_folder / "test_func_renamed.sh"
     assert sbatch_file.exists()
 
@@ -42,12 +48,41 @@ def test_slurm_my_func():
     test_func(
         1,
         2,
+        use_slurm=True,
         scripts_name="test_func_with_dep",
         job_dependency=out,
         slurm_folder=slurm_folder,
     )
     sbatch_file = slurm_folder / "test_func_with_dep.sh"
     assert sbatch_file.exists()
+
+    @slurm_it(
+        conda_env="cottage_analysis",
+        slurm_options={"time": "00:01:00"},
+        imports="numpy",
+        from_imports={"pandas": "Dataframe"},
+    )
+    def test_func(a, b):
+        from datetime import datetime
+
+        print("inner test_func")
+        print(a, b)
+        print(datetime.now())
+        return a + b
+
+    test_func(
+        1,
+        2,
+        use_slurm=True,
+        scripts_name="test_func_with_dep",
+        job_dependency=out,
+        slurm_folder=slurm_folder,
+    )
+    python_file = slurm_folder / "test_func_with_dep.py"
+    assert python_file.exists()
+    txt = python_file.read_text()
+    assert "import numpy" in txt
+    assert "from pandas import Dataframe" in txt
 
 
 if __name__ == "__main__":

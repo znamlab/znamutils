@@ -43,11 +43,14 @@ analysis_step(param1, param2, use_slurm=True, slurm_folder='~/somewhere')
 
 ## Setting slurm parameters
 
-The decorator has three arguments:
+The decorator has five arguments:
 - conda_env (str): name of the conda environment to activate. Required.
 - module_list (list, optional): list of modules to load with ml. Defaults to None.
 - slurm_options (dict, optional): options to pass to sbatch. Will be used to
     update the default config (see below) if not None. Defaults to None.
+- imports (list, optional): list of imports to add to the python script. Defaults to None.
+- from_imports (dict, optional): dict of imports to add to the python script as "from 
+    key import value". Defaults to None.
 
 The default parameters of SlurmIt are: 
 ```
@@ -60,11 +63,23 @@ partition="cpu"
 An example of fully custromised decoration would be:
 
 ```python
-@slurm_it(conda_env='myenv', module_list=['FFmpeg', 'cuda'], slurm_options=dict(partition="gpu")
+@slurm_it(conda_env='myenv', 
+  module_list=['FFmpeg', 'cuda'], 
+  slurm_options=dict(partition="gpu",
+  imports=['numpy', 'matplotlib'],
+  from_imports={'sklearn': 'svm'}
+  )
 def analysis_step(param1, param2):
   out = dostuff(param1, param2)
   return out
 ```
+
+> Note: 
+> `imports` and `from_imports` are useful only if the decorated function require non
+> built-in datatype arguments or if the module containing the function cannot be 
+> accessed from the python script in the same way as it is in the code calling slurm_it
+> (for instance if you use relative imports). Then explicitely setting `from_imports` to
+> import the decorated function is required.
 
 ## Calling the decorated function
 

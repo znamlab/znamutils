@@ -14,6 +14,8 @@ def slurm_it(
     conda_env=None,
     module_list=None,
     slurm_options=None,
+    imports=None,
+    from_imports=None,
 ):
     """
     Decorator to run a function on slurm.
@@ -41,6 +43,13 @@ def slurm_it(
         module_list (list, optional): list of modules to load with ml. Defaults to None.
         slurm_options (dict, optional): options to pass to sbatch. Will be used to
             update the default config (see above) if not None. Defaults to None.
+        imports (str or list, optional): List of imports to add to the script. Defaults
+            to None.
+        from_imports (dict, optional): Dictionary of imports to add to the python
+            script. Keys are the module names, values are the functions to import. For
+            instance {'numpy': 'mean'} results in `from numpy import mean`. If `None`,
+            the decorated function will be imported from its parent module. Defaults to
+            None.
 
     Returns:
         function: decorated function
@@ -63,7 +72,7 @@ def slurm_it(
     new_sig = add_signature_parameters(
         func_sig, last=(use_slurm, job_dependency, slurm_folder, script_name)
     )
-
+    from_imports = from_imports or {func.__module__: func.__name__}
     # create the new function with modified signature
     @wraps(func, new_sig=new_sig)
     def new_func(*args, **kwargs):
@@ -89,9 +98,6 @@ def slurm_it(
         assert slurm_folder.exists(), f"Folder {slurm_folder} does not exist"
         python_file = slurm_folder / f"{scripts_name}.py"
         sbatch_file = slurm_folder / f"{scripts_name}.sh"
-        mod = inspect.getmodule(func)
-        inspect.getmodule(Path).__name__
-        from_imports = {mod.__name__: func.__name__}
         assert conda_env is not None, "conda_env should be provided in the decorator"
 
         slurm_helper.create_slurm_sbatch(
@@ -109,6 +115,7 @@ def slurm_it(
             target_file=python_file,
             function_name=func.__name__,
             arguments=kwargs,
+            imports=imports,
             from_imports=from_imports,
         )
 
