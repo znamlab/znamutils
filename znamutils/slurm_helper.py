@@ -35,6 +35,7 @@ def create_slurm_sbatch(
     conda_env,
     slurm_options=None,
     module_list=None,
+    split_err_out=False,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -46,6 +47,8 @@ def create_slurm_sbatch(
         slurm_options (dict, optional): Options to give to sbatch. Defaults to None.
         module_list (list, optional): List of modules to load before calling the python
             script. Defaults to None.
+        split_err_out (bool, optional): Whether to split the error and output files.
+            Defaults to False.
     """
     if not script_name.endswith(".sh"):
         script_name += ".sh"
@@ -57,8 +60,11 @@ def create_slurm_sbatch(
         mem="32G",
         partition="cpu",
         output=target_folder / script_name.replace(".sh", ".out"),
-        error=target_folder / script_name.replace(".sh", ".err"),
     )
+
+    if split_err_out:
+        default_options["error"] = target_folder / script_name.replace(".sh", ".err")
+
     if slurm_options is None:
         slurm_options = {}
 
@@ -154,5 +160,3 @@ def python_script_from_template(
     python_script = Path(target_folder) / target_script_name
     with open(python_script, "w") as fhandle:
         fhandle.write(source)
-
-
