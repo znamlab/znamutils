@@ -5,7 +5,7 @@ as lightweight as possible and independant of flexiznam.
 
 # SlurmIt
 
-`@slurmit` is a decorator allowing to run a function on slurm. Once set up, running the 
+`@slurm_it` is a decorator allowing to run a function on slurm. Once set up, running the 
 decorated function with use_slurm=False will run the function and return its normal output.
 Running the decorated function with `use_slurm=True` will create a slurm script and a python 
 script, submit the slurm script and return the job id of the slurm job.
