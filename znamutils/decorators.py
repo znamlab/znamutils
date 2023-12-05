@@ -30,6 +30,7 @@ def slurm_it(
         job_dependency (str): job id to depend on
         slurm_folder (str): where to write the slurm script and logs
         scripts_name (str): name of the slurm script and python file
+        slurm_options (dict): options to pass to sbatch
 
     The default slurm options are:
         ntasks=1
@@ -54,6 +55,9 @@ def slurm_it(
     Returns:
         function: decorated function
     """
+    # make a copy of default slurm options to avoid modifying the original
+    default_slurm_options = slurm_options.copy()
+
     # add parameters to the wrapped function signature
     func_sig = signature(func)
     use_slurm = Parameter(
@@ -68,9 +72,13 @@ def slurm_it(
     script_name = Parameter(
         "scripts_name", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
     )
+    slurm_options = Parameter(
+        "slurm_options", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
+    )
 
     new_sig = add_signature_parameters(
-        func_sig, last=(use_slurm, job_dependency, slurm_folder, script_name)
+        func_sig,
+        last=(use_slurm, job_dependency, slurm_folder, script_name, slurm_options),
     )
     from_imports = from_imports or {func.__module__: func.__name__}
     # create the new function with modified signature
@@ -82,6 +90,10 @@ def slurm_it(
         job_dependency = kwargs.pop("job_dependency")
         slurm_folder = kwargs.pop("slurm_folder")
         scripts_name = kwargs.pop("scripts_name")
+        slurm_options = kwargs.pop("slurm_options")
+        if slurm_options is None:
+            slurm_options = {}
+        slurm_options = dict(default_slurm_options, **slurm_options)
 
         if not use_slurm:
             if job_dependency is not None:
