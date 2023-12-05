@@ -85,5 +85,38 @@ def test_slurm_my_func():
     assert "from pandas import Dataframe" in txt
 
 
+def test_update_slurm_options():
+    slurm_folder = (
+        Path(flz.PARAMETERS["data_root"]["processed"]) / "test" / "test_slurm_it"
+    )
+    slurm_folder.mkdir(exist_ok=True)
+
+    @slurm_it(conda_env="cottage_analysis", slurm_options={"time": "00:01:00"})
+    def test_func(a, b):
+        from datetime import datetime
+
+        print("inner test_func")
+        print(a, b)
+        print(datetime.now())
+        return a + b
+
+    test_func(1, 2, use_slurm=True, slurm_folder=slurm_folder)
+    sbatch_file = slurm_folder / "test_func.sh"
+    assert sbatch_file.exists()
+    with open(sbatch_file, "r") as f:
+        txt = f.read()
+        assert "#SBATCH --time=00:01:00" in txt
+    test_func(
+        1,
+        2,
+        use_slurm=True,
+        slurm_folder=slurm_folder,
+        slurm_options={"time": "00:02:00"},
+    )
+    with open(sbatch_file, "r") as f:
+        txt = f.read()
+        assert "#SBATCH --time=00:02:00" in txt
+
+
 if __name__ == "__main__":
     test_slurm_my_func()

@@ -90,6 +90,8 @@ use_slurm (bool): whether to use slurm or not
 job_dependency (str): job id to depend on
 slurm_folder (str): where to write the slurm script and logs
 scripts_name (str): name of the slurm script and python file
+slurm_options (dict): options to pass to sbatch, will update the default options 
+  provided in the decorator.
 ```
 
 When `use_slurm = True`, `slurm_folder` must be provided. 
