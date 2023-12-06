@@ -56,6 +56,8 @@ def slurm_it(
         function: decorated function
     """
     # make a copy of default slurm options to avoid modifying the original
+    if slurm_options is None:
+        slurm_options = {}
     default_slurm_options = slurm_options.copy()
 
     # add parameters to the wrapped function signature

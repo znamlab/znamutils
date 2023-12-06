@@ -13,6 +13,13 @@ def test_slurm_my_func():
     )
     slurm_folder.mkdir(exist_ok=True)
 
+    @slurm_it(conda_env="cottage_analysis")
+    def test_func(a, b):
+        return a + b
+
+    assert test_func(1, 2, use_slurm=False) == 3
+    assert isinstance(test_func(1, 2, use_slurm=True, slurm_folder=slurm_folder), str)
+
     @slurm_it(conda_env="cottage_analysis", slurm_options={"time": "00:01:00"})
     def test_func(a, b):
         from datetime import datetime
