@@ -1,6 +1,10 @@
 
 ## Changelog
 
+### [v0.4] - 2024-01-17
+
+- Job dependencies that are list or tuples are automatically formatted as `afterok:jobid1:jobid2:...`
+
 ### [v0.3] - 2023-12-05
 
 - Bugfix: `slurm_options` was required but can now be ommited in the decorator

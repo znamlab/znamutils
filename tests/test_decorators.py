@@ -92,6 +92,31 @@ def test_slurm_my_func():
     assert "from pandas import Dataframe" in txt
 
 
+def test_dependencies():
+    slurm_folder = (
+        Path(flz.PARAMETERS["data_root"]["processed"]) / "test" / "test_slurm_it"
+    )
+    import time
+
+    @slurm_it(conda_env="cottage_analysis")
+    def slow_func(a, b):
+        time.sleep(2)
+        return a + b
+
+    o1 = slow_func(1, 2, use_slurm=True, slurm_folder=slurm_folder)
+    o2 = slow_func(1, 2, use_slurm=True, slurm_folder=slurm_folder, job_dependency=o1)
+    o3 = slow_func(
+        1, 2, use_slurm=True, slurm_folder=slurm_folder, job_dependency=[o1, o2]
+    )
+    o4 = slow_func(
+        1,
+        2,
+        use_slurm=True,
+        slurm_folder=slurm_folder,
+        job_dependency=",".join([o1, o2, o3]),
+    )
+
+
 def test_update_slurm_options():
     slurm_folder = (
         Path(flz.PARAMETERS["data_root"]["processed"]) / "test" / "test_slurm_it"
