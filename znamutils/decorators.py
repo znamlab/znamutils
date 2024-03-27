@@ -16,6 +16,7 @@ def slurm_it(
     slurm_options=None,
     imports=None,
     from_imports=None,
+    print_job_id=False,
 ):
     """
     Decorator to run a function on slurm.
@@ -25,7 +26,7 @@ def slurm_it(
     Running the decorated function with use_slurm=True will create a slurm script and
     a python script, submit the slurm script and return the job id of the slurm job.
 
-    The decorated function will have 4 new keyword arguments:
+    The decorated function will have 6 new keyword arguments:
         use_slurm (bool): whether to use slurm or not
         dependency_type (str, optional): Type of dependence on previous jobs.
             Defaults to "afterok" which only runs the next job if all previous
@@ -55,6 +56,8 @@ def slurm_it(
             instance {'numpy': 'mean'} results in `from numpy import mean`. If `None`,
             the decorated function will be imported from its parent module. Defaults to
             None.
+        print_job_id (bool, optional): Whether to print the job id of the slurm job in 
+            the log file. Defaults to False.
 
     Returns:
         function: decorated function
@@ -149,6 +152,7 @@ def slurm_it(
             arguments=kwargs,
             imports=imports,
             from_imports=from_imports,
+            print_job_id=print_job_id,
         )
 
         return slurm_helper.run_slurm_batch(
