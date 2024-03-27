@@ -40,6 +40,7 @@ def create_slurm_sbatch(
     slurm_options=None,
     module_list=None,
     split_err_out=False,
+    print_job_id=False,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -83,6 +84,10 @@ def create_slurm_sbatch(
             boiler = "\n" + "\n".join([f"ml {module}" for module in module_list]) + "\n"
         else:
             boiler = "\n"
+
+        if print_job_id:
+            boiler += f'echo "Job ID: $SLURM_JOB_ID"\n'
+
         boiler += "\n".join(
             [
                 "ml Anaconda3",
