@@ -142,6 +142,7 @@ def slurm_it(
             conda_env=conda_env,
             slurm_options=slurm_options,
             module_list=module_list,
+            print_job_id=print_job_id,
         )
 
         # make sure that the function does not use slurm once running on slurm
