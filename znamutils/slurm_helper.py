@@ -5,11 +5,15 @@ import shlex
 import inspect
 
 
-def run_slurm_batch(script_path, job_dependency=None):
+def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None):
     """Run a slurm script
 
     Args:
         script_path (str): Full path to the script
+        dependency_type (str, optional): Type of dependence on previous jobs.
+            Defaults to "afterok" which only runs the next job if all previous
+            jobs have finished successfully. Other options are "after", "afterany",
+            "aftercorr" and "afternotok". See sbatch documentation for more details.
         job_dependency (str, optional): Job ID that needs to finish before running
             sbtach. Defaults to None.
 
@@ -17,7 +21,7 @@ def run_slurm_batch(script_path, job_dependency=None):
         str: Job ID of the sbatch job
     """
     if job_dependency is not None:
-        dep = f"--dependency=afterok:{job_dependency} "
+        dep = f"--dependency={dependency_type}:{job_dependency} "
     else:
         dep = ""
     command = f"sbatch {dep}{script_path}"
@@ -36,6 +40,7 @@ def create_slurm_sbatch(
     slurm_options=None,
     module_list=None,
     split_err_out=False,
+    print_job_id=False,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -79,6 +84,10 @@ def create_slurm_sbatch(
             boiler = "\n" + "\n".join([f"ml {module}" for module in module_list]) + "\n"
         else:
             boiler = "\n"
+
+        if print_job_id:
+            boiler += f'echo "Job ID: $SLURM_JOB_ID"\n'
+
         boiler += "\n".join(
             [
                 "ml Anaconda3",

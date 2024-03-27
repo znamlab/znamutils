@@ -86,6 +86,10 @@ The decorated function will have 4 new keyword arguments:
 
 ```
 use_slurm (bool): whether to use slurm or not
+dependency_type (str, optional): Type of dependence on previous jobs.
+    Defaults to "afterok" which only runs the next job if all previous
+    jobs have finished successfully. Other options are "after", "afterany",
+    "aftercorr" and "afternotok". See sbatch documentation for more details.
 job_dependency (str): job id to depend on
 slurm_folder (str): where to write the slurm script and logs
 scripts_name (str): name of the slurm script and python file

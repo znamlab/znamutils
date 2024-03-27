@@ -27,6 +27,10 @@ def slurm_it(
 
     The decorated function will have 4 new keyword arguments:
         use_slurm (bool): whether to use slurm or not
+        dependency_type (str, optional): Type of dependence on previous jobs.
+            Defaults to "afterok" which only runs the next job if all previous
+            jobs have finished successfully. Other options are "after", "afterany",
+            "aftercorr" and "afternotok". See sbatch documentation for more details.
         job_dependency (str): job id to depend on
         slurm_folder (str): where to write the slurm script and logs
         scripts_name (str): name of the slurm script and python file
@@ -65,6 +69,9 @@ def slurm_it(
     use_slurm = Parameter(
         "use_slurm", kind=Parameter.POSITIONAL_OR_KEYWORD, default=False
     )
+    dependency_type = Parameter(
+        "dependency_type", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
+    )
     job_dependency = Parameter(
         "job_dependency", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
     )
@@ -80,7 +87,14 @@ def slurm_it(
 
     new_sig = add_signature_parameters(
         func_sig,
-        last=(use_slurm, job_dependency, slurm_folder, script_name, slurm_options),
+        last=(
+            use_slurm,
+            dependency_type,
+            job_dependency,
+            slurm_folder,
+            script_name,
+            slurm_options,
+        ),
     )
     from_imports = from_imports or {func.__module__: func.__name__}
     # create the new function with modified signature
@@ -89,6 +103,7 @@ def slurm_it(
 
         # pop the slurm only arguments
         use_slurm = kwargs.pop("use_slurm")
+        dependency_type = kwargs.pop("dependency_type")
         job_dependency = kwargs.pop("job_dependency")
         slurm_folder = kwargs.pop("slurm_folder")
         scripts_name = kwargs.pop("scripts_name")
@@ -136,7 +151,13 @@ def slurm_it(
             from_imports=from_imports,
         )
 
-        return slurm_helper.run_slurm_batch(sbatch_file, job_dependency=job_dependency)
+        return slurm_helper.run_slurm_batch(
+            sbatch_file,
+            dependency_type=dependency_type
+            if dependency_type is not None
+            else "afterok",
+            job_dependency=job_dependency,
+        )
 
     # return the new function
     return new_func

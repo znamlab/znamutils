@@ -1,6 +1,11 @@
 
 ## Changelog
 
+### [v0.5] - 2024-03-27
+
+- Option to print job ID in log when starting.
+
+
 ### [v0.4] - 2024-01-17
 
 - Job dependencies that are list or tuples are automatically formatted as `afterok:jobid1:jobid2:...`
