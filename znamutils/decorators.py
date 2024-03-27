@@ -87,7 +87,14 @@ def slurm_it(
 
     new_sig = add_signature_parameters(
         func_sig,
-        last=(use_slurm, dependency_type, job_dependency, slurm_folder, script_name, slurm_options),
+        last=(
+            use_slurm,
+            dependency_type,
+            job_dependency,
+            slurm_folder,
+            script_name,
+            slurm_options,
+        ),
     )
     from_imports = from_imports or {func.__module__: func.__name__}
     # create the new function with modified signature
@@ -146,9 +153,11 @@ def slurm_it(
 
         return slurm_helper.run_slurm_batch(
             sbatch_file,
-            dependency_type=dependency_type if dependency_type is not None else "afterok",
-            job_dependency=job_dependency
-            )
+            dependency_type=dependency_type
+            if dependency_type is not None
+            else "afterok",
+            job_dependency=job_dependency,
+        )
 
     # return the new function
     return new_func
