@@ -1,7 +1,7 @@
 
 ## Changelog
 
-### [v0.5-dev] - 2024-03-27
+### [v0.6] - 2024-04-04
 
 - Change default cpu partition to `ncpu`
 
