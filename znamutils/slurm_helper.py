@@ -63,7 +63,7 @@ def create_slurm_sbatch(
         ntasks=1,
         time="12:00:00",
         mem="32G",
-        partition="cpu",
+        partition="ncpu",
         output=target_folder / script_name.replace(".sh", ".out"),
     )
 
