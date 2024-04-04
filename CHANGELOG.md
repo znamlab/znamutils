@@ -1,6 +1,10 @@
 
 ## Changelog
 
+### [v0.6] - 2024-04-04
+
+- Change default cpu partition to `ncpu`
+
 ### [v0.5] - 2024-03-27
 
 - Option to print job ID in log when starting.
