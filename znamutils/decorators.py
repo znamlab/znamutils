@@ -153,7 +153,6 @@ def slurm_it(
             arguments=kwargs,
             imports=imports,
             from_imports=from_imports,
-            print_job_id=print_job_id,
         )
 
         return slurm_helper.run_slurm_batch(

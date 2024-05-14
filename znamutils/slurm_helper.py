@@ -109,7 +109,6 @@ def python_script_single_func(
     arguments=None,
     imports=None,
     from_imports=None,
-    print_job_id=False,
 ):
     """Create a python script that will call a function
 
@@ -123,7 +122,6 @@ def python_script_single_func(
         from_imports (dict, optional): Dictionary of imports to add to the script. Keys
             are the module names, values are the functions to import. For instance
             {'numpy': 'mean'} results in `from numpy import mean`. Defaults to None.
-        print_job_id (bool, optional): Whether to print the job ID. Defaults to False.
     """
 
     target_file = Path(target_file)
