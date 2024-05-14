@@ -104,7 +104,12 @@ def create_slurm_sbatch(
 
 
 def python_script_single_func(
-    target_file, function_name, arguments=None, imports=None, from_imports=None, print_job_id=False,
+    target_file,
+    function_name,
+    arguments=None,
+    imports=None,
+    from_imports=None,
+    print_job_id=False,
 ):
     """Create a python script that will call a function
 

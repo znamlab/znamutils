@@ -56,7 +56,7 @@ def slurm_it(
             instance {'numpy': 'mean'} results in `from numpy import mean`. If `None`,
             the decorated function will be imported from its parent module. Defaults to
             None.
-        print_job_id (bool, optional): Whether to print the job id of the slurm job in 
+        print_job_id (bool, optional): Whether to print the job id of the slurm job in
             the log file. Defaults to False.
 
     Returns:
@@ -100,10 +100,10 @@ def slurm_it(
         ),
     )
     from_imports = from_imports or {func.__module__: func.__name__}
+
     # create the new function with modified signature
     @wraps(func, new_sig=new_sig)
     def new_func(*args, **kwargs):
-
         # pop the slurm only arguments
         use_slurm = kwargs.pop("use_slurm")
         dependency_type = kwargs.pop("dependency_type")
