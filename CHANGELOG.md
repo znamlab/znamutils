@@ -2,7 +2,7 @@
 ## Changelog
 
 
-### [v0.7] - 2024-04-04
+### [v0.7] - 2024-05-14
 
 - Feature: `pathlib.Path` are automatically converted to strings in the main slurm 
     python script. This avoid crashing because `PosixPath` and co are not imported.
