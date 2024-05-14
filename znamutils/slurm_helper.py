@@ -109,6 +109,7 @@ def python_script_single_func(
     arguments=None,
     imports=None,
     from_imports=None,
+    path2string=True,
 ):
     """Create a python script that will call a function
 
@@ -122,6 +123,8 @@ def python_script_single_func(
         from_imports (dict, optional): Dictionary of imports to add to the script. Keys
             are the module names, values are the functions to import. For instance
             {'numpy': 'mean'} results in `from numpy import mean`. Defaults to None.
+        path2string (bool, optional): Whether to convert arguments that are paths to
+            strings. Defaults to True.
     """
 
     target_file = Path(target_file)
@@ -142,6 +145,8 @@ def python_script_single_func(
         fhandle.write(f"{function_name}(")
         if arguments is not None:
             for k, v in arguments.items():
+                if path2string and isinstance(v, Path):
+                    v = str(v)
                 fhandle.write(f"{k}={repr(v)}, ")
         fhandle.write(")\n")
 
