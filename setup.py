@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="znamutils",
-    version="v0.6",
+    version="v0.6-dev",
     packages=find_packages(exclude=["tests"]),
     url="https://github.com/znamlab/znamutils",
     license="MIT",
