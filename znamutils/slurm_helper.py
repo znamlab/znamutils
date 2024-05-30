@@ -40,7 +40,7 @@ def create_slurm_sbatch(
     slurm_options=None,
     module_list=None,
     split_err_out=False,
-    print_job_id=False,
+    print_job_id=True,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -53,7 +53,8 @@ def create_slurm_sbatch(
         module_list (list, optional): List of modules to load before calling the python
             script. Defaults to None.
         split_err_out (bool, optional): Whether to split the error and output files.
-            Defaults to False.
+            Defaults to True.
+        print_job_id (bool, optional): Whether to print the job id in the log file.
     """
     if not script_name.endswith(".sh"):
         script_name += ".sh"
