@@ -65,7 +65,7 @@ def create_slurm_sbatch(
         script_name += ".sh"
     if env_vars_to_pass is None:
         env_vars_to_pass = {}
-    
+
     target_folder = Path(target_folder)
     default_options = dict(
         ntasks=1,
@@ -158,9 +158,9 @@ def python_script_single_func(
     elif isinstance(imports, str):
         imports = [imports]
 
-    if vars2parse and ('argparse' not in imports):
-        imports.append('argparse')
-    
+    if vars2parse and ("argparse" not in imports):
+        imports.append("argparse")
+
     with open(target_file, "w") as fhandle:
         for imp in imports:
             fhandle.write(f"import {imp}\n")
@@ -175,7 +175,7 @@ def python_script_single_func(
                 fhandle.write(f"parser.add_argument('--{v}')\n")
             fhandle.write("args = parser.parse_args()\n")
             fhandle.write("\n")
-        
+
         fhandle.write(f"{function_name}(")
         if arguments is not None:
             for k, v in arguments.items():
