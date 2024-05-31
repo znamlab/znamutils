@@ -62,6 +62,7 @@ def create_slurm_sbatch(
     module_list=None,
     split_err_out=False,
     print_job_id=True,
+    add_jobid_to_output=False,
     env_vars_to_pass=None,
 ):
     """Create a slurm sh script that will call a python script
@@ -78,6 +79,8 @@ def create_slurm_sbatch(
             Defaults to True.
         print_job_id (bool, optional): Whether to print the job id in the log file.
             Defaults to True.
+        add_jobid_to_output (bool, optional): Whether to add the job id to the output
+            file. Required when env_vars_to_pass is not None. Defaults to False.
         env_vars_to_pass (dict, optional): Dictionary of environment variables to pass
             to the script. Keys are the name of the argument expected by the python
             script and values are the environment variable. Defaults to None.
@@ -93,11 +96,13 @@ def create_slurm_sbatch(
         time="12:00:00",
         mem="32G",
         partition="ncpu",
-        output=target_folder / script_name.replace(".sh", ".out"),
+        output=str(target_folder / script_name.replace(".sh", ".out")),
     )
+    if add_jobid_to_output or env_vars_to_pass:
+        default_options["output"] = default_options["output"].replace(".out", "_%j.out")
 
     if split_err_out:
-        default_options["error"] = target_folder / script_name.replace(".sh", ".err")
+        default_options["error"] = default_options["output"].replace(".out", ".err")
 
     if slurm_options is None:
         slurm_options = {}
