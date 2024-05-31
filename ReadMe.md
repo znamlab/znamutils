@@ -82,7 +82,7 @@ def analysis_step(param1, param2):
 
 ## Calling the decorated function
 
-The decorated function will have 4 new keyword arguments:
+The decorated function will have 6 new keyword arguments:
 
 ```
 use_slurm (bool): whether to use slurm or not
@@ -95,10 +95,16 @@ slurm_folder (str): where to write the slurm script and logs
 scripts_name (str): name of the slurm script and python file
 slurm_options (dict): options to pass to sbatch, will update the default options
   provided in the decorator.
+batch_param_names (list): list of parameters on which the function should be batched
+batch_param_values (list): list of values for the batched parameters
 ```
 
 When `use_slurm = True`, `slurm_folder` must be provided.
 If `scripts_name` is false, the name of the function is used instead.
+
+If `batch_param_names` is provided, `batch_param_values` must be a list of tuples the
+same length as `batch_param_names`. The function will be called for each tuple of
+values in `batch_param_values`.
 
 Calling:
 
@@ -115,9 +121,10 @@ jobid = analysis_step(param1, param2, use_slurm=True, slurm_folder='~/somewhere'
 will create `~/somewhere/run2.py` and `~/somewhere/run2.sh`, then `sbatch` the `sh` script without
 dependencies.
 
+
 ## Limitations:
 
-IMPORT and paramter types (to document)
+IMPORT and parameter types (to document)
 
 # Slurm utils
 

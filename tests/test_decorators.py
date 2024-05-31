@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from znamutils import slurm_it
 
@@ -96,7 +97,6 @@ def test_dependencies():
     slurm_folder = (
         Path(flz.PARAMETERS["data_root"]["processed"]) / "test" / "test_slurm_it"
     )
-    import time
 
     @slurm_it(conda_env="cottage_analysis")
     def slow_func(a, b):
@@ -150,5 +150,48 @@ def test_update_slurm_options():
         assert "#SBATCH --time=00:02:00" in txt
 
 
+def test_batch_run(tmpdir):
+    @slurm_it(conda_env="cottage_analysis", slurm_options={"time": "00:01:00"})
+    def batch_test_func(tardir, a=None, b=None):
+        target = str(tardir) + f"/test_{a}.txt"
+        with open(target, "w") as f:
+            f.write(f"{a} {b}")
+        return target
+
+    batch_test_func(
+        str(tmpdir),
+        use_slurm=True,
+        scripts_name="batch_test_func_with_dep",
+        slurm_folder=str(tmpdir),
+        batch_param_list=[[1, 2], [3, 4]],
+        batch_param_names=["a", "b"],
+    )
+    sh_file = tmpdir / "batch_test_func_with_dep.sh"
+    assert sh_file.exists()
+    with open(sh_file, "r") as f:
+        txt = f.read()
+    assert "batch_test_func_with_dep.py --a $a --b $b" in txt
+    python_file = tmpdir / "batch_test_func_with_dep.py"
+    assert python_file.exists()
+    with open(python_file, "r") as f:
+        txt = f.read()
+    lines = [
+        "import argparse",
+        "",
+        "from test_decorators import batch_test_func",
+        "",
+        "parser = argparse.ArgumentParser()",
+        "parser.add_argument('--a')",
+        "parser.add_argument('--b')",
+        "args = parser.parse_args()",
+        "",
+        f"batch_test_func(tardir='{str(tmpdir)}', use_slurm=False, a=args.a, b=args.b, )",
+        "",
+    ]
+    for expected, actual in zip(lines, txt.split("\n")):
+        assert expected == actual, f"{expected} != {actual}"
+
+
 if __name__ == "__main__":
-    test_slurm_my_func()
+    tmpdir = Path(flz.PARAMETERS["data_root"]["processed"]) / "test"
+    test_batch_run(tmpdir)
