@@ -144,8 +144,35 @@ def test_python_script_single_func(tmpdir):
         assert expected == actual
 
 
+def test_run_slurm_batch():
+    script_path = "testpath/testscript.sh"
+    cmd = slurm_helper.run_slurm_batch(script_path, dry_run=True)
+    assert cmd == f"sbatch {script_path}"
+    cmd = slurm_helper.run_slurm_batch(
+        script_path, dependency_type="afterok", job_dependency="134", dry_run=True
+    )
+    assert cmd == f"sbatch --dependency=afterok:134 {script_path}"
+    cmd = slurm_helper.run_slurm_batch(
+        script_path, dependency_type="dp", job_dependency="134", dry_run=True
+    )
+    assert cmd == f"sbatch --dependency=dp:134 {script_path}"
+    cmd = slurm_helper.run_slurm_batch(
+        script_path, env_vars={"var": "value"}, dry_run=True
+    )
+    assert cmd == f"sbatch --export=var=value {script_path}"
+    cmd = slurm_helper.run_slurm_batch(
+        script_path, env_vars={"var": "value", "var2": 1}, dry_run=True
+    )
+    assert cmd == f"sbatch --export=var=value,var2=1 {script_path}"
+    cmd = slurm_helper.run_slurm_batch(
+        script_path, env_vars={"var": "value"}, job_dependency=12, dry_run=True
+    )
+    assert cmd == f"sbatch --export=var=value --dependency=afterok:12 {script_path}"
+
+
 if __name__ == "__main__":
     tmpdir = Path(flz.PARAMETERS["data_root"]["processed"]) / "test"
+    test_run_slurm_batch()
     test_python_script_single_func(tmpdir)
     test_create_slurm_sbatch(tmpdir)
     print("ok")

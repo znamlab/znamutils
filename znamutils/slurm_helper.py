@@ -5,7 +5,13 @@ import shlex
 import inspect
 
 
-def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None):
+def run_slurm_batch(
+    script_path,
+    dependency_type="afterok",
+    job_dependency=None,
+    env_vars=None,
+    dry_run=False,
+):
     """Run a slurm script
 
     Args:
@@ -16,6 +22,9 @@ def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None)
             "aftercorr" and "afternotok". See sbatch documentation for more details.
         job_dependency (str, optional): Job ID that needs to finish before running
             sbtach. Defaults to None.
+        env_vars (dict, optional): Dictionary of environment variables to pass to the
+            script. Defaults to None.
+        dry_run (bool, optional): Whether to run the command or just print it.
 
     Returns:
         str: Job ID of the sbatch job
@@ -24,7 +33,19 @@ def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None)
         dep = f"--dependency={dependency_type}:{job_dependency} "
     else:
         dep = ""
-    command = f"sbatch {dep}{script_path}"
+
+    if env_vars is not None:
+        vars = "--export="
+        vars += ",".join([f"{k}={v}" for k, v in env_vars.items()])
+        vars += " "
+    else:
+        vars = ""
+
+    command = f"sbatch {vars}{dep}{script_path}"
+
+    if dry_run:
+        print(command)
+        return command
 
     procout = subprocess.check_output(shlex.split(command))
     # get the job id
