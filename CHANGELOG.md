@@ -1,6 +1,12 @@
 
 ## Changelog
 
+### [v0.8] - 2024-05-31
+
+- Feature: Option to run batch jobs in parallel slurm jobs. If `batch_param_names` and
+`batch_param_values` are provided, the function will be called for each tuple of values
+in `batch_param_values`
+
 
 ### [v0.7] - 2024-05-14
 
