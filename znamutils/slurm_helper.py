@@ -41,6 +41,7 @@ def create_slurm_sbatch(
     module_list=None,
     split_err_out=False,
     print_job_id=True,
+    env_vars_to_pass=None,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -55,10 +56,16 @@ def create_slurm_sbatch(
         split_err_out (bool, optional): Whether to split the error and output files.
             Defaults to True.
         print_job_id (bool, optional): Whether to print the job id in the log file.
+            Defaults to True.
+        env_vars_to_pass (dict, optional): Dictionary of environment variables to pass
+            to the script. Keys are the name of the argument expected by the python
+            script and values are the environment variable. Defaults to None.
     """
     if not script_name.endswith(".sh"):
         script_name += ".sh"
-
+    if env_vars_to_pass is None:
+        env_vars_to_pass = {}
+    
     target_folder = Path(target_folder)
     default_options = dict(
         ntasks=1,
@@ -100,14 +107,21 @@ def create_slurm_sbatch(
         )
         fhandle.write(boiler)
 
+        cmd = f"python {python_script}"
+        if env_vars_to_pass:
+            for k, v in env_vars_to_pass.items():
+                if not k.startswith("-"):
+                    k = "--" + k
+                cmd += f" {k} ${v}"
         # and the real call
-        fhandle.write(f"\n\npython {python_script}\n")
+        fhandle.write(f"\n\n{cmd}\n")
 
 
 def python_script_single_func(
     target_file,
     function_name,
     arguments=None,
+    vars2parse=None,
     imports=None,
     from_imports=None,
     path2string=True,
@@ -119,6 +133,9 @@ def python_script_single_func(
         function_name (str): Name of the function to call
         arguments (dict, optional): Dictionary of arguments to pass to the function.
             Defaults to None.
+        vars2parse (dict, optional): Dictionary of variables to parse from the command
+            line. Keys are the command line argument names, values are the corresponding
+            keyword arguments for the python script. Defaults to None.
         imports (str or list, optional): List of imports to add to the script. Defaults
             to None.
         from_imports (dict, optional): Dictionary of imports to add to the script. Keys
@@ -130,11 +147,18 @@ def python_script_single_func(
 
     target_file = Path(target_file)
     assert target_file.parent.exists(), f"{target_file.parent} does not exist"
+
+    if vars2parse is None:
+        vars2parse = {}
+
     if imports is None:
         imports = []
     elif isinstance(imports, str):
         imports = [imports]
 
+    if vars2parse and ('argparse' not in imports):
+        imports.append('argparse')
+    
     with open(target_file, "w") as fhandle:
         for imp in imports:
             fhandle.write(f"import {imp}\n")
@@ -143,12 +167,22 @@ def python_script_single_func(
             for module, function in from_imports.items():
                 fhandle.write(f"from {module} import {function}\n")
             fhandle.write("\n")
+        if vars2parse:
+            fhandle.write("parser = argparse.ArgumentParser()\n")
+            for k, v in vars2parse.items():
+                fhandle.write(f"parser.add_argument('--{k}')\n")
+            fhandle.write("args = parser.parse_args()\n")
+            fhandle.write("\n")
+        
         fhandle.write(f"{function_name}(")
         if arguments is not None:
             for k, v in arguments.items():
                 if path2string and isinstance(v, Path):
                     v = str(v)
                 fhandle.write(f"{k}={repr(v)}, ")
+        if vars2parse:
+            for k, v in vars2parse.items():
+                fhandle.write(f"{v}=args.{k}, ")
         fhandle.write(")\n")
 
 
