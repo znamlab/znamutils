@@ -110,8 +110,10 @@ def create_slurm_sbatch(
         cmd = f"python {python_script}"
         if env_vars_to_pass:
             for k, v in env_vars_to_pass.items():
-                if not k.startswith("-"):
+                if not k.startswith("--"):
                     k = "--" + k
+                elif k.startswith("-"):
+                    raise ValueError(f"Short options are not supported: {k}")
                 cmd += f" {k} ${v}"
         # and the real call
         fhandle.write(f"\n\n{cmd}\n")
@@ -134,8 +136,8 @@ def python_script_single_func(
         arguments (dict, optional): Dictionary of arguments to pass to the function.
             Defaults to None.
         vars2parse (dict, optional): Dictionary of variables to parse from the command
-            line. Keys are the command line argument names, values are the corresponding
-            keyword arguments for the python script. Defaults to None.
+            line. Keys are the keyword arguments for the python function and values the
+            cli variable to parse. Defaults to None.
         imports (str or list, optional): List of imports to add to the script. Defaults
             to None.
         from_imports (dict, optional): Dictionary of imports to add to the script. Keys
@@ -170,7 +172,7 @@ def python_script_single_func(
         if vars2parse:
             fhandle.write("parser = argparse.ArgumentParser()\n")
             for k, v in vars2parse.items():
-                fhandle.write(f"parser.add_argument('--{k}')\n")
+                fhandle.write(f"parser.add_argument('--{v}')\n")
             fhandle.write("args = parser.parse_args()\n")
             fhandle.write("\n")
         
@@ -182,7 +184,7 @@ def python_script_single_func(
                 fhandle.write(f"{k}={repr(v)}, ")
         if vars2parse:
             for k, v in vars2parse.items():
-                fhandle.write(f"{v}=args.{k}, ")
+                fhandle.write(f"{k}=args.{v}, ")
         fhandle.write(")\n")
 
 
