@@ -59,6 +59,9 @@ def test_create_slurm_sbatch(tmpdir):
     )
     with open(tmpdir / "test.sh") as f:
         txt = f.read()
+
+    # running in batch will add the job id to output file
+    lines[5] = f"#SBATCH --output={tmpdir}/test_%j.out"
     lines[-2] = "python test.py --param $test --param2 $test2"
     for actual, expected in zip(txt.split("\n"), lines):
         assert actual == expected
