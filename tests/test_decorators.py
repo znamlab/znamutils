@@ -115,6 +115,22 @@ def test_dependencies():
         slurm_folder=slurm_folder,
         job_dependency=",".join([o1, o2, o3]),
     )
+    # it work with a list
+    o5 = slow_func(
+        1,
+        2,
+        use_slurm=True,
+        slurm_folder=slurm_folder,
+        job_dependency=[o1, o2, o3, o4],
+    )
+    # it works with empty list
+    o6 = slow_func(
+        1,
+        2,
+        use_slurm=True,
+        slurm_folder=slurm_folder,
+        job_dependency=[],
+    )
 
 
 def test_update_slurm_options():

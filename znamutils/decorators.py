@@ -110,7 +110,7 @@ def slurm_it(
         slurm_options = dict(default_slurm_options, **slurm_options)
 
         if isinstance(job_dependency, list) or isinstance(job_dependency, tuple):
-            job_dependency = ":".join(job_dependency)
+            job_dependency = ":".join(job_dependency) if len(job_dependency) else None
 
         if not use_slurm:
             if job_dependency is not None:
