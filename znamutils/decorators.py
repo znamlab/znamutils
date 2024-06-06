@@ -11,6 +11,7 @@ from pathlib import Path
 @function_decorator
 def slurm_it(
     func=DECORATED,
+    *,
     conda_env=None,
     module_list=None,
     slurm_options=None,
