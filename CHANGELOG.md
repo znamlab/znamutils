@@ -1,6 +1,10 @@
 
 ## Changelog
 
+### [v0.9] - 2024-06-06
+
+- Bugfix: slurm_it runs if dependency is an empty list.
+
 ### [v0.8] - 2024-05-31
 
 - Feature: Option to run batch jobs in parallel slurm jobs. If `batch_param_names` and
