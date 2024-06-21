@@ -11,7 +11,6 @@ from pathlib import Path
 @function_decorator
 def slurm_it(
     func=DECORATED,
-    *,
     conda_env=None,
     module_list=None,
     slurm_options=None,
@@ -83,9 +82,7 @@ def slurm_it(
     parameters = []
     for name in new_parameter_names:
         default = False if name == "use_slurm" else None
-        parameters.append(
-            Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, default=default)
-        )
+        parameters.append(Parameter(name, Parameter.KEYWORD_ONLY, default=default))
     new_sig = add_signature_parameters(
         func_sig,
         last=parameters,
