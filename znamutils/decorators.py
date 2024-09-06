@@ -69,35 +69,23 @@ def slurm_it(
 
     # add parameters to the wrapped function signature
     func_sig = signature(func)
-    use_slurm = Parameter(
-        "use_slurm", kind=Parameter.POSITIONAL_OR_KEYWORD, default=False
-    )
-    dependency_type = Parameter(
-        "dependency_type", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
-    )
-    job_dependency = Parameter(
-        "job_dependency", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
-    )
-    slurm_folder = Parameter(
-        "slurm_folder", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
-    )
-    script_name = Parameter(
-        "scripts_name", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
-    )
-    slurm_options = Parameter(
-        "slurm_options", kind=Parameter.POSITIONAL_OR_KEYWORD, default=None
-    )
-
+    new_parameter_names = [
+        "use_slurm",
+        "dependency_type",
+        "job_dependency",
+        "slurm_folder",
+        "scripts_name",
+        "slurm_options",
+        "batch_param_names",
+        "batch_param_list",
+    ]
+    parameters = []
+    for name in new_parameter_names:
+        default = False if name == "use_slurm" else None
+        parameters.append(Parameter(name, Parameter.KEYWORD_ONLY, default=default))
     new_sig = add_signature_parameters(
         func_sig,
-        last=(
-            use_slurm,
-            dependency_type,
-            job_dependency,
-            slurm_folder,
-            script_name,
-            slurm_options,
-        ),
+        last=parameters,
     )
     from_imports = from_imports or {func.__module__: func.__name__}
 
@@ -111,12 +99,15 @@ def slurm_it(
         slurm_folder = kwargs.pop("slurm_folder")
         scripts_name = kwargs.pop("scripts_name")
         slurm_options = kwargs.pop("slurm_options")
+        batch_param_list = kwargs.pop("batch_param_list")
+        batch_param_names = kwargs.pop("batch_param_names")
+
         if slurm_options is None:
             slurm_options = {}
         slurm_options = dict(default_slurm_options, **slurm_options)
 
         if isinstance(job_dependency, list) or isinstance(job_dependency, tuple):
-            job_dependency = ":".join(job_dependency)
+            job_dependency = ":".join(job_dependency) if len(job_dependency) else None
 
         if not use_slurm:
             if job_dependency is not None:
@@ -135,6 +126,19 @@ def slurm_it(
         sbatch_file = slurm_folder / f"{scripts_name}.sh"
         assert conda_env is not None, "conda_env should be provided in the decorator"
 
+        if batch_param_names is not None:
+            if isinstance(batch_param_names, str):
+                batch_param_names = [batch_param_names]
+
+            assert batch_param_list is not None, "batch_param_list should be provided"
+            n_params = len(batch_param_names)
+            for l in batch_param_list:
+                assert (
+                    len(l) == n_params
+                ), "All lists in batch_param_list should have the same length"
+            env_vars_to_pass = {p: p for p in batch_param_names}
+        else:
+            env_vars_to_pass = None
         slurm_helper.create_slurm_sbatch(
             target_folder=slurm_folder,
             script_name=sbatch_file.name,
@@ -143,23 +147,48 @@ def slurm_it(
             slurm_options=slurm_options,
             module_list=module_list,
             print_job_id=print_job_id,
+            env_vars_to_pass=env_vars_to_pass,
         )
 
         # make sure that the function does not use slurm once running on slurm
         kwargs["use_slurm"] = False
+        if batch_param_names is not None:
+            # remove from kwargs the parameters that will be provided by batch
+            for p_name in batch_param_names:
+                v = kwargs.pop(p_name, None)
+                if v is not None:
+                    print(f"Warning: parameter {p_name}={v} was removed from kwargs")
+                    print("It will be passed as environment variable")
+
         slurm_helper.python_script_single_func(
             target_file=python_file,
             function_name=func.__name__,
             arguments=kwargs,
             imports=imports,
             from_imports=from_imports,
+            vars2parse=env_vars_to_pass,
         )
+
+        if dependency_type is None:
+            dependency_type = "afterok"
+
+        if env_vars_to_pass is not None:
+            # run multiple jobs
+            job_ids = []
+            for params in batch_param_list:
+                env_vars = {k: v for k, v in zip(batch_param_names, params)}
+                jid = slurm_helper.run_slurm_batch(
+                    sbatch_file,
+                    dependency_type=dependency_type,
+                    job_dependency=job_dependency,
+                    env_vars=env_vars,
+                )
+                job_ids.append(jid)
+            return job_ids
 
         return slurm_helper.run_slurm_batch(
             sbatch_file,
-            dependency_type=dependency_type
-            if dependency_type is not None
-            else "afterok",
+            dependency_type=dependency_type,
             job_dependency=job_dependency,
         )
 

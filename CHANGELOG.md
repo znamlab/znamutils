@@ -1,10 +1,20 @@
 
 ## Changelog
 
+### [v0.9] - 2024-06-06
+
+- Bugfix: slurm_it runs if dependency is an empty list.
+
+### [v0.8] - 2024-05-31
+
+- Feature: Option to run batch jobs in parallel slurm jobs. If `batch_param_names` and
+`batch_param_values` are provided, the function will be called for each tuple of values
+in `batch_param_values`
+
 
 ### [v0.7] - 2024-05-14
 
-- Feature: `pathlib.Path` are automatically converted to strings in the main slurm 
+- Feature: `pathlib.Path` are automatically converted to strings in the main slurm
     python script. This avoid crashing because `PosixPath` and co are not imported.
 
 ### [v0.6] - 2024-04-04

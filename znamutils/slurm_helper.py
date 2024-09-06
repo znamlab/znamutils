@@ -5,7 +5,13 @@ import shlex
 import inspect
 
 
-def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None):
+def run_slurm_batch(
+    script_path,
+    dependency_type="afterok",
+    job_dependency=None,
+    env_vars=None,
+    dry_run=False,
+):
     """Run a slurm script
 
     Args:
@@ -16,6 +22,9 @@ def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None)
             "aftercorr" and "afternotok". See sbatch documentation for more details.
         job_dependency (str, optional): Job ID that needs to finish before running
             sbtach. Defaults to None.
+        env_vars (dict, optional): Dictionary of environment variables to pass to the
+            script. Defaults to None.
+        dry_run (bool, optional): Whether to run the command or just print it.
 
     Returns:
         str: Job ID of the sbatch job
@@ -24,7 +33,19 @@ def run_slurm_batch(script_path, dependency_type="afterok", job_dependency=None)
         dep = f"--dependency={dependency_type}:{job_dependency} "
     else:
         dep = ""
-    command = f"sbatch {dep}{script_path}"
+
+    if env_vars is not None:
+        vars = "--export="
+        vars += ",".join([f"{k}={v}" for k, v in env_vars.items()])
+        vars += " "
+    else:
+        vars = ""
+
+    command = f"sbatch {vars}{dep}{script_path}"
+
+    if dry_run:
+        print(command)
+        return command
 
     procout = subprocess.check_output(shlex.split(command))
     # get the job id
@@ -40,7 +61,9 @@ def create_slurm_sbatch(
     slurm_options=None,
     module_list=None,
     split_err_out=False,
-    print_job_id=False,
+    print_job_id=True,
+    add_jobid_to_output=False,
+    env_vars_to_pass=None,
 ):
     """Create a slurm sh script that will call a python script
 
@@ -53,10 +76,19 @@ def create_slurm_sbatch(
         module_list (list, optional): List of modules to load before calling the python
             script. Defaults to None.
         split_err_out (bool, optional): Whether to split the error and output files.
-            Defaults to False.
+            Defaults to True.
+        print_job_id (bool, optional): Whether to print the job id in the log file.
+            Defaults to True.
+        add_jobid_to_output (bool, optional): Whether to add the job id to the output
+            file. Required when env_vars_to_pass is not None. Defaults to False.
+        env_vars_to_pass (dict, optional): Dictionary of environment variables to pass
+            to the script. Keys are the name of the argument expected by the python
+            script and values are the environment variable. Defaults to None.
     """
     if not script_name.endswith(".sh"):
         script_name += ".sh"
+    if env_vars_to_pass is None:
+        env_vars_to_pass = {}
 
     target_folder = Path(target_folder)
     default_options = dict(
@@ -64,11 +96,13 @@ def create_slurm_sbatch(
         time="12:00:00",
         mem="32G",
         partition="ncpu",
-        output=target_folder / script_name.replace(".sh", ".out"),
+        output=str(target_folder / script_name.replace(".sh", ".out")),
     )
+    if add_jobid_to_output or env_vars_to_pass:
+        default_options["output"] = default_options["output"].replace(".out", "_%j.out")
 
     if split_err_out:
-        default_options["error"] = target_folder / script_name.replace(".sh", ".err")
+        default_options["error"] = default_options["output"].replace(".out", ".err")
 
     if slurm_options is None:
         slurm_options = {}
@@ -99,14 +133,23 @@ def create_slurm_sbatch(
         )
         fhandle.write(boiler)
 
+        cmd = f"python {python_script}"
+        if env_vars_to_pass:
+            for k, v in env_vars_to_pass.items():
+                if not k.startswith("--"):
+                    k = "--" + k
+                elif k.startswith("-"):
+                    raise ValueError(f"Short options are not supported: {k}")
+                cmd += f" {k} ${v}"
         # and the real call
-        fhandle.write(f"\n\npython {python_script}\n")
+        fhandle.write(f"\n\n{cmd}\n")
 
 
 def python_script_single_func(
     target_file,
     function_name,
     arguments=None,
+    vars2parse=None,
     imports=None,
     from_imports=None,
     path2string=True,
@@ -118,6 +161,9 @@ def python_script_single_func(
         function_name (str): Name of the function to call
         arguments (dict, optional): Dictionary of arguments to pass to the function.
             Defaults to None.
+        vars2parse (dict, optional): Dictionary of variables to parse from the command
+            line. Keys are the keyword arguments for the python function and values the
+            cli variable to parse. Defaults to None.
         imports (str or list, optional): List of imports to add to the script. Defaults
             to None.
         from_imports (dict, optional): Dictionary of imports to add to the script. Keys
@@ -129,10 +175,17 @@ def python_script_single_func(
 
     target_file = Path(target_file)
     assert target_file.parent.exists(), f"{target_file.parent} does not exist"
+
+    if vars2parse is None:
+        vars2parse = {}
+
     if imports is None:
         imports = []
     elif isinstance(imports, str):
         imports = [imports]
+
+    if vars2parse and ("argparse" not in imports):
+        imports.append("argparse")
 
     with open(target_file, "w") as fhandle:
         for imp in imports:
@@ -142,12 +195,22 @@ def python_script_single_func(
             for module, function in from_imports.items():
                 fhandle.write(f"from {module} import {function}\n")
             fhandle.write("\n")
+        if vars2parse:
+            fhandle.write("parser = argparse.ArgumentParser()\n")
+            for k, v in vars2parse.items():
+                fhandle.write(f"parser.add_argument('--{v}')\n")
+            fhandle.write("args = parser.parse_args()\n")
+            fhandle.write("\n")
+
         fhandle.write(f"{function_name}(")
         if arguments is not None:
             for k, v in arguments.items():
                 if path2string and isinstance(v, Path):
                     v = str(v)
                 fhandle.write(f"{k}={repr(v)}, ")
+        if vars2parse:
+            for k, v in vars2parse.items():
+                fhandle.write(f"{k}=args.{v}, ")
         fhandle.write(")\n")
 
 
