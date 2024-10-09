@@ -1,6 +1,10 @@
 
 ## Changelog
 
+### [v0.10] - 2024-10-09
+
+- Packaging: switch to `pyproject.toml` for packaging.
+
 ### [v0.9] - 2024-06-06
 
 - Bugfix: slurm_it runs if dependency is an empty list.
