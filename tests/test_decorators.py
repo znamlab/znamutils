@@ -202,7 +202,8 @@ def test_batch_run(tmpdir):
         "parser.add_argument('--b')",
         "args = parser.parse_args()",
         "",
-        f"batch_test_func(tardir='{str(tmpdir)}', use_slurm=False, a=args.a, b=args.b, )",
+        f"batch_test_func(tardir='{str(tmpdir)}', use_slurm=False, a=args.a, b=args.b, "
+        + ")",
         "",
     ]
     for expected, actual in zip(lines, txt.split("\n")):

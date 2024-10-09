@@ -131,9 +131,9 @@ def slurm_it(
 
             assert batch_param_list is not None, "batch_param_list should be provided"
             n_params = len(batch_param_names)
-            for l in batch_param_list:
+            for param_list in batch_param_list:
                 assert (
-                    len(l) == n_params
+                    len(param_list) == n_params
                 ), "All lists in batch_param_list should have the same length"
             env_vars_to_pass = {p: p for p in batch_param_names}
         else:

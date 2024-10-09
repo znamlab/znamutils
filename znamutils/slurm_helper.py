@@ -121,12 +121,13 @@ def create_slurm_sbatch(
         if print_job_id:
             boiler += 'echo "Job ID: $SLURM_JOB_ID"\n'
 
+        LD_PATH = f"~/.conda/envs/{conda_env}/lib/"
         boiler += "\n".join(
             [
                 "ml Anaconda3",
                 "source activate base",
                 f"conda activate {conda_env}",
-                f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.conda/envs/{conda_env}/lib/",
+                f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{LD_PATH}",
                 "",
             ]
         )
