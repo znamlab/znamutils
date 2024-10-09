@@ -1,8 +1,7 @@
 """Function to help to generate and run slurm scripts"""
-from pathlib import Path
-import subprocess
 import shlex
-import inspect
+import subprocess
+from pathlib import Path
 
 
 def run_slurm_batch(
@@ -120,7 +119,7 @@ def create_slurm_sbatch(
             boiler = "\n"
 
         if print_job_id:
-            boiler += f'echo "Job ID: $SLURM_JOB_ID"\n'
+            boiler += 'echo "Job ID: $SLURM_JOB_ID"\n'
 
         boiler += "\n".join(
             [

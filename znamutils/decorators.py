@@ -1,11 +1,10 @@
-from decorator import decorator
-from znamutils import slurm_helper
-import inspect
-from inspect import signature, Parameter
-from decopatch import function_decorator, DECORATED
-from makefun import wraps, add_signature_parameters
-from inspect import signature, Parameter
+from inspect import Parameter, signature
 from pathlib import Path
+
+from decopatch import DECORATED, function_decorator
+from makefun import add_signature_parameters, wraps
+
+from znamutils import slurm_helper
 
 
 @function_decorator
