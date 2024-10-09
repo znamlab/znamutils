@@ -195,7 +195,7 @@ def test_batch_run(tmpdir):
     lines = [
         "import argparse",
         "",
-        "from test_decorators import batch_test_func",
+        "from tests.test_decorators import batch_test_func",
         "",
         "parser = argparse.ArgumentParser()",
         "parser.add_argument('--a')",
@@ -208,8 +208,3 @@ def test_batch_run(tmpdir):
     ]
     for expected, actual in zip(lines, txt.split("\n")):
         assert expected == actual, f"{expected} != {actual}"
-
-
-if __name__ == "__main__":
-    tmpdir = Path(flz.PARAMETERS["data_root"]["processed"]) / "test"
-    test_batch_run(tmpdir)
