@@ -124,8 +124,7 @@ def create_slurm_sbatch(
         LD_PATH = f"~/.conda/envs/{conda_env}/lib/"
         boiler += "\n".join(
             [
-                "ml Anaconda3",
-                "source activate base",
+                "source ~/.bashrc ",
                 f"conda activate {conda_env}",
                 f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{LD_PATH}",
                 "",
