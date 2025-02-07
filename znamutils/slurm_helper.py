@@ -1,8 +1,7 @@
 """Function to help to generate and run slurm scripts"""
-from pathlib import Path
-import subprocess
 import shlex
-import inspect
+import subprocess
+from pathlib import Path
 
 
 def run_slurm_batch(
@@ -120,14 +119,14 @@ def create_slurm_sbatch(
             boiler = "\n"
 
         if print_job_id:
-            boiler += f'echo "Job ID: $SLURM_JOB_ID"\n'
+            boiler += 'echo "Job ID: $SLURM_JOB_ID"\n'
 
+        LD_PATH = f"~/.conda/envs/{conda_env}/lib/"
         boiler += "\n".join(
             [
-                "ml Anaconda3",
-                "source activate base",
+                "source ~/.bashrc ",
                 f"conda activate {conda_env}",
-                f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.conda/envs/{conda_env}/lib/",
+                f"export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{LD_PATH}",
                 "",
             ]
         )

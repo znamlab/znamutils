@@ -1,11 +1,10 @@
-from decorator import decorator
-from znamutils import slurm_helper
-import inspect
-from inspect import signature, Parameter
-from decopatch import function_decorator, DECORATED
-from makefun import wraps, add_signature_parameters
-from inspect import signature, Parameter
+from inspect import Parameter, signature
 from pathlib import Path
+
+from decopatch import DECORATED, function_decorator
+from makefun import add_signature_parameters, wraps
+
+from znamutils import slurm_helper
 
 
 @function_decorator
@@ -132,9 +131,9 @@ def slurm_it(
 
             assert batch_param_list is not None, "batch_param_list should be provided"
             n_params = len(batch_param_names)
-            for l in batch_param_list:
+            for param_list in batch_param_list:
                 assert (
-                    len(l) == n_params
+                    len(param_list) == n_params
                 ), "All lists in batch_param_list should have the same length"
             env_vars_to_pass = {p: p for p in batch_param_names}
         else:

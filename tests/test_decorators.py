@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+
 from znamutils import slurm_it
 
 try:
@@ -116,7 +117,7 @@ def test_dependencies():
         job_dependency=",".join([o1, o2, o3]),
     )
     # it work with a list
-    o5 = slow_func(
+    slow_func(
         1,
         2,
         use_slurm=True,
@@ -124,7 +125,7 @@ def test_dependencies():
         job_dependency=[o1, o2, o3, o4],
     )
     # it works with empty list
-    o6 = slow_func(
+    slow_func(
         1,
         2,
         use_slurm=True,
@@ -194,20 +195,16 @@ def test_batch_run(tmpdir):
     lines = [
         "import argparse",
         "",
-        "from test_decorators import batch_test_func",
+        "from tests.test_decorators import batch_test_func",
         "",
         "parser = argparse.ArgumentParser()",
         "parser.add_argument('--a')",
         "parser.add_argument('--b')",
         "args = parser.parse_args()",
         "",
-        f"batch_test_func(tardir='{str(tmpdir)}', use_slurm=False, a=args.a, b=args.b, )",
+        f"batch_test_func(tardir='{str(tmpdir)}', use_slurm=False, a=args.a, b=args.b, "
+        + ")",
         "",
     ]
     for expected, actual in zip(lines, txt.split("\n")):
         assert expected == actual, f"{expected} != {actual}"
-
-
-if __name__ == "__main__":
-    tmpdir = Path(flz.PARAMETERS["data_root"]["processed"]) / "test"
-    test_batch_run(tmpdir)
