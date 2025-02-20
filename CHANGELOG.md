@@ -1,6 +1,13 @@
 
 ## Changelog
 
+### [v0.10.1] - 2025-02-20
+
+Feature:
+
+- `format_numpy_object` options in creating python scripts. Default to True, will
+  transform numpy objects to python builtin (np.float32 to float for instance).
+
 ### [v0.10] - 2024-10-09
 
 Minor changes:
