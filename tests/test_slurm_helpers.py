@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import numpy as np
+
 from znamutils import slurm_helper
 
 try:
@@ -146,6 +148,50 @@ def test_python_script_single_func(tmpdir):
     ]
     for expected, actual in zip(lines, txt.split("\n")):
         assert expected == actual
+
+
+def test_python_script_single_func_conversion(tmpdir):
+    target_file = tmpdir / "test.py"
+    args = dict(
+        npfloat=np.float64(1),
+        npint=np.int64(1),
+        nparray=np.array([1, 2, 3]),
+        pythonfloat=1.0,
+        pythonint=1,
+    )
+    slurm_helper.python_script_single_func(
+        target_file,
+        function_name="test",
+        arguments=args,
+        vars2parse=None,
+        imports=None,
+        from_imports=None,
+        path2string=True,
+        format_numpy_objects=True,
+    )
+    with open(target_file) as f:
+        txt = f.read()
+
+    assert (
+        "\ntest(npfloat=1.0, npint=1, nparray=[1, 2, 3], pythonfloat=1.0, "
+        + "pythonint=1, )\n"
+    ) == txt
+    slurm_helper.python_script_single_func(
+        target_file,
+        function_name="test",
+        arguments=args,
+        vars2parse=None,
+        imports=None,
+        from_imports=None,
+        path2string=True,
+        format_numpy_objects=False,
+    )
+    with open(target_file) as f:
+        txt = f.read()
+    assert (
+        "\ntest(npfloat=np.float64(1.0), npint=np.int64(1), "
+        + "nparray=array([1, 2, 3]), pythonfloat=1.0, pythonint=1, )\n"
+    ) == txt
 
 
 def test_run_slurm_batch():

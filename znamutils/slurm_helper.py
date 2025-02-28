@@ -152,6 +152,7 @@ def python_script_single_func(
     imports=None,
     from_imports=None,
     path2string=True,
+    format_numpy_objects=True,
 ):
     """Create a python script that will call a function
 
@@ -170,6 +171,8 @@ def python_script_single_func(
             {'numpy': 'mean'} results in `from numpy import mean`. Defaults to None.
         path2string (bool, optional): Whether to convert arguments that are paths to
             strings. Defaults to True.
+        format_numpy_objects (bool, optional): Whether to format numpy numbers as python
+            basic types. Defaults to True.
     """
 
     target_file = Path(target_file)
@@ -206,6 +209,8 @@ def python_script_single_func(
             for k, v in arguments.items():
                 if path2string and isinstance(v, Path):
                     v = str(v)
+                if format_numpy_objects and type(v).__module__ == "numpy":
+                    v = v.tolist()
                 fhandle.write(f"{k}={repr(v)}, ")
         if vars2parse:
             for k, v in vars2parse.items():
