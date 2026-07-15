@@ -4,11 +4,6 @@ import numpy as np
 
 from znamutils import slurm_helper
 
-try:
-    import flexiznam as flz
-except ImportError:
-    raise ImportError("flexiznam is required to run this test")
-
 
 def test_create_slurm_sbatch(tmpdir):
     slurm_helper.create_slurm_sbatch(
@@ -28,8 +23,7 @@ def test_create_slurm_sbatch(tmpdir):
         "#SBATCH --partition=ncpu",
         f"#SBATCH --output={tmpdir}/test.out",
         'echo "Job ID: $SLURM_JOB_ID"',
-        "ml Anaconda3",
-        "source activate base",
+        "source ~/.bashrc ",
         "conda activate cottage_analysis",
         "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.conda/envs/cottage_analysis/lib/",
         "",
@@ -221,6 +215,8 @@ def test_run_slurm_batch():
 
 
 if __name__ == "__main__":
+    import flexiznam as flz
+
     tmpdir = Path(flz.PARAMETERS["data_root"]["processed"]) / "test"
     test_run_slurm_batch()
     test_python_script_single_func(tmpdir)
