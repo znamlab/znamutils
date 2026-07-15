@@ -3,7 +3,7 @@ name = "znamutils"
 authors = [{name = "Antonin Blot", email= "antonin.blot@crick.ac.uk"}]
 description = "Common utility functions for analysis"
 readme = "README.md"
-requires-python = ">=3.8.0"
+requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = ["decopatch", "makefun", "decorator"]
 license = {text = "MIT"}
