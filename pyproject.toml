@@ -3,7 +3,7 @@ name = "znamutils"
 authors = [{name = "Antonin Blot", email= "antonin.blot@crick.ac.uk"}]
 description = "Common utility functions for analysis"
 readme = "README.md"
-requires-python = ">=3.8.0"
+requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = ["decopatch", "makefun", "decorator"]
 license = {text = "MIT"}
@@ -25,9 +25,8 @@ dev = [
   "pytest",
   "pytest-cov",
   "coverage",
-  "tox",
-  "black",
   "mypy",
+  "numpy",
   "pre-commit",
   "ruff",
   "setuptools_scm",
@@ -36,34 +35,12 @@ dev = [
 [tool.pytest.ini_options]
 addopts = "--cov=znamutils"
 
-[tool.black]
-target-version = ['py39', 'py310', 'py311']
-skip-string-normalization = false
-line-length = 88
-
 [tool.setuptools_scm]
 
 [tool.ruff]
 line-length = 88
 exclude = ["__init__.py","build",".eggs"]
-select = ["I", "E", "F"]
 fix = true
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py{39,310,311}
-isolated_build = True
-
-[gh-actions]
-python =
-    3.9: py39
-    3.10: py310
-    3.11: py311
-
-[testenv]
-extras =
-    dev
-commands =
-    pytest -v --color=yes --cov=image_tools --cov-report=xml
-"""
+[tool.ruff.lint]
+select = ["I", "E", "F"]

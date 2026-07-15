@@ -133,3 +133,39 @@ A collection of utilities to interact with the Slurm scheduler. Used by `slurmit
 # Tests
 
 To run the test, we need to access camp/nemo and slurm. It also requires a flexiznam installation.
+
+# Development
+
+This project uses [uv](https://docs.astral.sh/uv/) to manage the dev environment.
+
+Set up a local environment:
+
+```bash
+uv venv
+uv pip install -e ".[dev]"
+source .venv/bin/activate
+```
+
+Run the checks:
+
+```bash
+pytest
+ruff check .
+ruff format .
+```
+
+`pre-commit` hooks (ruff, mypy, etc.) run automatically via [pre-commit.ci](https://pre-commit.ci/) on
+pull requests. To run them locally:
+
+```bash
+pre-commit run --all-files
+```
+
+> Note: this repo does not commit a `uv.lock` file. znamutils is a library, not an
+> application: a lock file pins exact dependency versions for reproducibility, which
+> matters for something you deploy, but not for a library that gets installed
+> alongside a consumer's own dependency tree. Testing against current, unpinned
+> dependency versions (as CI does) is more likely to catch real compatibility issues
+> than testing against a frozen snapshot. For this reason, prefer the `uv venv` /
+> `uv pip install` workflow above over `uv run`, which operates in "project mode" and
+> will auto-create a `uv.lock` as a side effect.

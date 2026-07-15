@@ -1,4 +1,5 @@
 .pytest_cache
+.venv
 **/.DS_Store
 .idea
 tests/test_data/tests_outputs
@@ -7,3 +8,4 @@ tests/test_data/tests_outputs
 *checkpoint.ipynb
 build/
 .coverage
+coverage.xml

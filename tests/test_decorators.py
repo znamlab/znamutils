@@ -1,12 +1,14 @@
 import time
 from pathlib import Path
 
+import pytest
+
 from znamutils import slurm_it
 
-try:
-    import flexiznam as flz
-except ImportError:
-    raise ImportError("flexiznam is required to run this test")
+flz = pytest.importorskip(
+    "flexiznam",
+    reason="flexiznam and a live slurm cluster are required to run this test",
+)
 
 
 def test_slurm_my_func():
