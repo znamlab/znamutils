@@ -26,6 +26,7 @@ dev = [
   "pytest-cov",
   "coverage",
   "mypy",
+  "numpy",
   "pre-commit",
   "ruff",
   "setuptools_scm",
