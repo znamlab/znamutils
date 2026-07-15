@@ -1,4 +1,5 @@
 """Function to help to generate and run slurm scripts"""
+
 import shlex
 import subprocess
 from pathlib import Path

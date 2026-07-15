@@ -16,19 +16,16 @@ repos:
             args: [--fix=lf]
           - id: requirements-txt-fixer
           - id: trailing-whitespace
-    - repo: https://github.com/psf/black
-      rev: 23.3.0
-      hooks:
-          - id: black
     - repo: https://github.com/kynan/nbstripout
       rev: 0.6.1
       hooks:
           - id: nbstripout
             args: [--extra-keys=metadata.language_info.version metadata.kernelspec.name metadata.kernelspec.display_name]
-    - repo: https://github.com/charliermarsh/ruff-pre-commit
-      rev: v0.0.272
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.15.21
       hooks:
         - id: ruff
+        - id: ruff-format
     - repo: https://github.com/pre-commit/mirrors-mypy
       rev: v1.3.0
       hooks:
